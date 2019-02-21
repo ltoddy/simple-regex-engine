@@ -1,0 +1,7 @@
+[package]
+name = "simple-regex-engine"
+version = "0.1.0"
+authors = ["ltoddy <taoliu0509@gmail.com>"]
+edition = "2018"
+
+[dependencies]
