@@ -1,5 +1,12 @@
 #[doc("单个字符的匹配")]
-pub fn match_one(pattern: &[char], text: &[char]) -> bool {
+pub fn match_one<P, T>(pattern: P, text: T) -> bool
+    where
+        P: Into<String>,
+        T: Into<String>,
+{
+    let pattern = pattern.into();
+    let text = text.into();
+
     if pattern.is_empty() {
         // 任何text都可匹配空的pattern
         return true;
@@ -10,7 +17,7 @@ pub fn match_one(pattern: &[char], text: &[char]) -> bool {
         return false;
     }
 
-    if pattern == ['.'] {
+    if pattern == "." {
         return true;
     }
 
@@ -18,11 +25,27 @@ pub fn match_one(pattern: &[char], text: &[char]) -> bool {
 }
 
 #[doc("相同长度的字符串匹配,(由于match是关键字,这里用matches命名)")]
-pub fn matches(pattern: &[char], text: &[char]) -> bool {
+pub fn matches<P, T>(pattern: P, text: T) -> bool
+    where
+        P: Into<String>,
+        T: Into<String>,
+{
+    let pattern = pattern.into();
+    let text = text.into();
+
     if pattern.is_empty() {
-        true
+        return true;
     } else {
-        match_one(&pattern[..0], &text[..0]) && matches(&pattern[1..], &text[1..])
+        let pattern = pattern.chars();
+        let text = text.chars();
+
+        return match_one(
+            pattern.clone().take(1).collect::<String>(),
+            text.clone().take(1).collect::<String>(),
+        ) && matches(
+            pattern.clone().skip(1).collect::<String>(),
+            text.clone().skip(1).collect::<String>(),
+        );
     }
 }
 
@@ -32,15 +55,15 @@ pub mod test {
 
     #[test]
     pub fn test_match_one() {
-        assert_eq!(match_one(&['a'], &['a']), true);
-        assert_eq!(match_one(&['.'], &['z']), true);
-        assert_eq!(match_one(&[], &['g']), true);
-        assert_eq!(match_one(&['a'], &['b']), false);
-        assert_eq!(match_one(&['p'], &[]), false);
+        assert_eq!(match_one("a", "a"), true);
+        assert_eq!(match_one(".", "z"), true);
+        assert_eq!(match_one("", "g"), true);
+        assert_eq!(match_one("a", "b"), false);
+        assert_eq!(match_one("p", ""), false);
     }
 
     #[test]
     pub fn test_matches() {
-        assert_eq!(matches(&['a', '.', 'c'], &['a', 'b', 'c']), true);
+        assert_eq!(matches(r#"a.c"#, "abc"), true);
     }
 }
