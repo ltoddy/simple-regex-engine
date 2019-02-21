@@ -1,8 +1,8 @@
 #[doc("单个字符的匹配")]
 pub fn match_one<P, T>(pattern: P, text: T) -> bool
-    where
-        P: Into<String>,
-        T: Into<String>,
+where
+    P: Into<String>,
+    T: Into<String>,
 {
     let pattern = pattern.into();
     let text = text.into();
@@ -26,14 +26,18 @@ pub fn match_one<P, T>(pattern: P, text: T) -> bool
 
 #[doc("相同长度的字符串匹配,(由于match是关键字,这里用matches命名)")]
 pub fn matches<P, T>(pattern: P, text: T) -> bool
-    where
-        P: Into<String>,
-        T: Into<String>,
+where
+    P: Into<String>,
+    T: Into<String>,
 {
     let pattern = pattern.into();
     let text = text.into();
 
     if pattern.is_empty() {
+        return true;
+    }
+
+    if pattern == "$" && text.is_empty() {
         return true;
     } else {
         let pattern = pattern.chars();
@@ -65,5 +69,6 @@ pub mod test {
     #[test]
     pub fn test_matches() {
         assert_eq!(matches(r#"a.c"#, "abc"), true);
+        assert_eq!(matches(r#"a.c$"#, "abc"), true);
     }
 }
