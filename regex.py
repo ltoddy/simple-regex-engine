@@ -1,21 +1,12 @@
-import unittest
-from itertools import starmap
-
-
 def match_one(pattern: str, text: str) -> bool:
     """
     单个字符串匹配
     """
-    if not pattern:
-        return True
+    if not pattern: return True
 
-    if not text:
-        return False
+    if not text: return False
 
-    if pattern == ".":
-        return True
-
-    return pattern == text
+    return pattern == "." or pattern == text
 
 
 def _match_question(pattern: str, text: str) -> bool:
@@ -55,7 +46,10 @@ def search(pattern: str, text: str) -> bool:
     if pattern[0] == '^':
         return match(pattern[1:], text)
     else:
-        return any(starmap(lambda index, _: match(pattern, text[index:]), enumerate(text)))
+        return match('.*' + pattern, text)
+
+
+import unittest
 
 
 class RegexTestCase(unittest.TestCase):
@@ -77,6 +71,8 @@ class RegexTestCase(unittest.TestCase):
         self.assertTrue(search("ab?c", "ac"))
         self.assertTrue(search("ab?c", "abc"))
         self.assertTrue(search("a?b?c?", "abc"))
+        self.assertTrue(search("a?b?c?", ""))
 
+        self.assertTrue(search("a*", ""))
         self.assertTrue(search("a*", "aaaaaaaaa"))
         self.assertTrue(search("a*b", "aaaaaaaaab"))
