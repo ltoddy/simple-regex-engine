@@ -1,4 +1,5 @@
 import unittest
+from itertools import starmap
 
 
 def match_one(pattern: str, text: str) -> bool:
@@ -30,6 +31,16 @@ def match(pattern: str, text: str) -> bool:
         return match_one(pattern[0], text[0]) and match(pattern[1:], text[1:])
 
 
+def search(pattern: str, text: str) -> bool:
+    """
+    任意位置匹配
+    """
+    if pattern[0] == '^':
+        return match(pattern[1:], text)
+    else:
+        return any(starmap(lambda index, _: match(pattern, text[index:]), enumerate(text)))
+
+
 class RegexTestCase(unittest.TestCase):
     def test_match_one(self):
         self.assertTrue(match_one('a', 'a'))
@@ -40,3 +51,8 @@ class RegexTestCase(unittest.TestCase):
 
     def test_match(self):
         self.assertTrue("a.c", "abc")
+        self.assertTrue("a.c$", "abc")
+
+    def test_search(self):
+        self.assertTrue(search("^abc", "abc"))
+        self.assertTrue(search("bc", "abcd"))
