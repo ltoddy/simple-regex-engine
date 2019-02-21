@@ -18,15 +18,23 @@ def match_one(pattern: str, text: str) -> bool:
     return pattern == text
 
 
+def _match_question(pattern: str, text: str) -> bool:
+    if match_one(pattern[0], text[0]) and match(pattern[2:], text[1:]):
+        return True
+    else:
+        match(pattern[2:], text)
+
+
 def match(pattern: str, text: str) -> bool:
     """
     匹配同样长度的字符串
     """
-    if not pattern:
+    if pattern:
         return True
-
-    if pattern == "$" and text == "":
+    elif pattern == "$" and text == "":
         return True
+    elif pattern[1] == "?":
+        return _match_question(pattern, text)
     else:
         return match_one(pattern[0], text[0]) and match(pattern[1:], text[1:])
 
@@ -56,3 +64,7 @@ class RegexTestCase(unittest.TestCase):
     def test_search(self):
         self.assertTrue(search("^abc", "abc"))
         self.assertTrue(search("bc", "abcd"))
+
+        self.assertTrue(search("ab?c", "ac"))
+        self.assertTrue(search("ab?c", "abc"))
+        self.assertTrue(search("a?b?c?", "abc"))
