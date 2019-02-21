@@ -19,10 +19,17 @@ def match_one(pattern: str, text: str) -> bool:
 
 
 def _match_question(pattern: str, text: str) -> bool:
-    if match_one(pattern[0], text[0]) and match(pattern[2:], text[1:]):
-        return True
-    else:
-        match(pattern[2:], text)
+    """
+    match `?`
+    """
+    return (match_one(pattern[0], text[0]) and match(pattern[2:], text[1:])) or match(pattern[2:], text)
+
+
+def _match_star(pattern: str, text: str) -> bool:
+    """
+    match `*`
+    """
+    return (match_one(pattern[0], text[0]) and match(pattern, text[1:])) or match(pattern[2:], text)
 
 
 def match(pattern: str, text: str) -> bool:
@@ -35,6 +42,8 @@ def match(pattern: str, text: str) -> bool:
         return True
     elif pattern[1] == "?":
         return _match_question(pattern, text)
+    elif pattern[1] == "*":
+        return _match_star(pattern, text)
     else:
         return match_one(pattern[0], text[0]) and match(pattern[1:], text[1:])
 
@@ -68,3 +77,6 @@ class RegexTestCase(unittest.TestCase):
         self.assertTrue(search("ab?c", "ac"))
         self.assertTrue(search("ab?c", "abc"))
         self.assertTrue(search("a?b?c?", "abc"))
+
+        self.assertTrue(search("a*", "aaaaaaaaa"))
+        self.assertTrue(search("a*b", "aaaaaaaaab"))
