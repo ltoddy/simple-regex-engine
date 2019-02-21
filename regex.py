@@ -23,6 +23,9 @@ def match(pattern: str, text: str) -> bool:
     """
     if not pattern:
         return True
+
+    if pattern == "$" and text == "":
+        return True
     else:
         return match_one(pattern[0], text[0]) and match(pattern[1:], text[1:])
 
