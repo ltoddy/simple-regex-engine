@@ -68,13 +68,7 @@ pub mod regex {
         let pattern = pattern.into();
         let text = text.into();
 
-        if pattern.is_empty() {
-            return true;
-        }
-
-        if pattern == "$" && text.is_empty() {
-            true
-        } else if pattern.starts_with('$') && text == "" {
+        if pattern.is_empty() || pattern.starts_with('$') && text == "" {
             true
         } else if pattern
             .clone()
@@ -117,10 +111,7 @@ pub mod regex {
         if pattern.starts_with('^') {
             matches(pattern.chars().skip(1).collect::<String>(), text)
         } else {
-            let text = text.chars();
-            text.clone()
-                .enumerate()
-                .any(|(i, _)| matches(pattern.clone(), text.clone().skip(i).collect::<String>()))
+            matches(format!(".*{}", pattern), text)
         }
     }
 }
@@ -153,7 +144,9 @@ pub mod test {
         assert_eq!(search(r#"ab?c"#, "ac"), true);
         assert_eq!(search(r#"ab?c"#, "abc"), true);
         assert_eq!(search(r#"a?b?c?"#, "abc"), true);
+        assert_eq!(search(r#"a?b?c?"#, ""), true);
 
+        assert_eq!(search(r#"a*"#, ""), true);
         assert_eq!(search(r#"a*"#, "aaaaaaaaa"), true);
         assert_eq!(search(r#"a*b"#, "aaaaaaaaaaab"), true);
     }
