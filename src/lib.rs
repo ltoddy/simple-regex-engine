@@ -42,6 +42,23 @@ pub mod regex {
         )) || matches(pattern.clone().chars().skip(2).collect::<String>(), text)
     }
 
+    fn match_star<P, T>(pattern: P, text: T) -> bool
+    where
+        P: Into<String>,
+        T: Into<String>,
+    {
+        let pattern = pattern.into();
+        let text = text.into();
+
+        (match_one(
+            pattern.clone().chars().take(1).collect::<String>(),
+            text.clone().chars().take(1).collect::<String>(),
+        ) && matches(
+            pattern.clone(),
+            text.clone().chars().skip(1).collect::<String>(),
+        )) || matches(pattern.clone().chars().skip(2).collect::<String>(), text)
+    }
+
     #[doc("相同长度的字符串匹配,(由于match是关键字,这里用matches命名)")]
     pub fn matches<P, T>(pattern: P, text: T) -> bool
     where
@@ -67,6 +84,14 @@ pub mod regex {
             .starts_with('?')
         {
             match_question(pattern, text)
+        } else if pattern
+            .clone()
+            .chars()
+            .skip(1)
+            .collect::<String>()
+            .starts_with('*')
+        {
+            match_star(pattern.clone(), text.clone())
         } else {
             let pattern = pattern.chars();
             let text = text.chars();
@@ -128,5 +153,8 @@ pub mod test {
         assert_eq!(search(r#"ab?c"#, "ac"), true);
         assert_eq!(search(r#"ab?c"#, "abc"), true);
         assert_eq!(search(r#"a?b?c?"#, "abc"), true);
+
+        assert_eq!(search(r#"a*"#, "aaaaaaaaa"), true);
+        assert_eq!(search(r#"a*b"#, "aaaaaaaaaaab"), true);
     }
 }
