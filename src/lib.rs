@@ -1,17 +1,4 @@
 pub mod regex {
-    fn substring(raw: &str, start: Option<usize>, end: Option<usize>) -> String {
-        match (start, end) {
-            (None, None) => raw.chars().collect::<String>(),
-            (Some(start), None) => raw.chars().skip(start).collect::<String>(),
-            (None, Some(end)) => raw.chars().take(end).collect::<String>(),
-            (Some(start), Some(end)) => raw
-                .chars()
-                .skip(start)
-                .take(end - start)
-                .collect::<String>(),
-        }
-    }
-
     #[doc("单个字符的匹配")]
     pub fn match_one<P, T>(pattern: P, text: T) -> bool
     where
@@ -46,13 +33,8 @@ pub mod regex {
         let pattern = pattern.into();
         let text = text.into();
 
-        (match_one(
-            substring(&pattern, None, Some(1)),
-            substring(&text, None, Some(1)),
-        ) && matches(
-            substring(&pattern, Some(2), None),
-            substring(&text, Some(1), None),
-        )) || matches(substring(&pattern, Some(2), None), text)
+        (match_one(&pattern[..1], &text[..1.min(text.len())]) && matches(&pattern[2..], &text[1..]))
+            || matches(&pattern[2..], text)
     }
 
     fn match_star<P, T>(pattern: P, text: T) -> bool
@@ -63,11 +45,8 @@ pub mod regex {
         let pattern = pattern.into();
         let text = text.into();
 
-        (match_one(
-            substring(&pattern, None, Some(1)),
-            substring(&text, None, Some(1)),
-        ) && matches(pattern.clone(), substring(&text, Some(1), None)))
-            || matches(substring(&pattern, Some(2), None), text)
+        (match_one(&pattern[..1], &text[..1.min(text.len())]) && matches(&pattern[..], &text[1..]))
+            || matches(&pattern[2..], text)
     }
 
     #[doc("相同长度的字符串匹配,(由于match是关键字,这里用matches命名)")]
@@ -81,18 +60,13 @@ pub mod regex {
 
         if pattern.is_empty() || pattern.starts_with('$') && text == "" {
             true
-        } else if substring(&pattern, Some(1), None).starts_with('?') {
+        } else if pattern[1..].starts_with('?') {
             match_question(pattern, text)
-        } else if substring(&pattern, Some(1), None).starts_with('*') {
-            match_star(pattern.clone(), text.clone())
+        } else if pattern[1..].starts_with('*') {
+            match_star(pattern, text)
         } else {
-            match_one(
-                substring(&pattern, None, Some(1)),
-                substring(&text, None, Some(1)),
-            ) && matches(
-                substring(&pattern, Some(1), None),
-                substring(&text, Some(1), None),
-            )
+            match_one(&pattern[..1], &text[..1.min(text.len())])
+                && matches(&pattern[1..], &text[1..])
         }
     }
 
@@ -105,7 +79,7 @@ pub mod regex {
         let text = text.into();
 
         if pattern.starts_with('^') {
-            matches(substring(&pattern, Some(1), None), text)
+            matches(&pattern[1..], text)
         } else {
             matches(format!(".*{}", pattern), text)
         }
